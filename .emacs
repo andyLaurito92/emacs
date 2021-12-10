@@ -1,8 +1,11 @@
-(load (expand-file-name "~/.quicklisp/slime-helper.el"))
-  ;; Replace "sbcl" with the path to your implementation
-(setq inferior-lisp-program "/opt/homebrew/bin/sbcl")
+(load (expand-file-name "~/quicklisp/slime-helper.el"))
+;; Replace "sbcl" with the path to your implementation
+(setq inferior-lisp-program "/usr/local/bin/sbcl")
 ;; Initialize package sources
 (require 'package)
+
+;; Add melpa package source when using package list
+(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
 			 ("org" . "https://orgmode.org/elpa/")
@@ -18,7 +21,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("fe1c13d75398b1c8fd7fdd1241a55c286b86c3e4ce513c4292d01383de152cb7" default))
+   '("da186cce19b5aed3f6a2316845583dbee76aea9255ea0da857d1c058ff003546" "234dbb732ef054b109a9e5ee5b499632c63cc24f7c2383a849815dacc1727cb6" "fe1c13d75398b1c8fd7fdd1241a55c286b86c3e4ce513c4292d01383de152cb7" default))
  '(package-selected-packages
    '(doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##)))
 (custom-set-faces
@@ -30,13 +33,13 @@
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 
 ;; Turn on dracula
-;;(load-theme 'dracula t)
+(load-theme 'dracula t)
 
 ;;customize theme
 ;; If you want to use powerline, (require 'powerline) must be
 ;; before (require 'moe-theme).
-;;(add-to-list 'load-path "~/.emacs.d/PATH/TO/powerline/")
-;;(require 'powerline)
+(add-to-list 'load-path "~/.emacs.d/PATH/TO/powerline/")
+(require 'powerline)
 
 ;; Moe-theme
 (add-to-list 'custom-theme-load-path "~/.emacs.d/elpa/moe-theme-1.0.1")
@@ -47,12 +50,12 @@
 (setq moe-theme-highlight-buffer-id t)
 
 ;; Resize titles (optional).
-;;(setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
+(setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
 (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
 (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
 
 ;; Choose a color for mode-line.(Default: blue)
-(moe-theme-set-color 'green)
+;;(moe-theme-set-color 'green)
 
 ;; Finally, apply moe-theme now.
 ;; Choose what you like, (moe-light) or (moe-dark)
@@ -141,3 +144,5 @@
   ([remap describe-command] . helpful-command)
   ([remap describe-variable] . counsel-describe-variable)
   ([remap describe-key] . helpful-key))
+(put 'erase-buffer 'disabled nil)
+
