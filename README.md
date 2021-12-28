@@ -9,3 +9,4 @@ Personal emacs config
 2. Open Emacs and run: M-x package-refresh-contents
 3. M-x package-install RET dracula-theme
 4. M-x package-install RET powerline
+5. Take a look at https://github.com/emacs-eaf/emacs-application-framework
