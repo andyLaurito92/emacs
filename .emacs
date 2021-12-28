@@ -12,6 +12,12 @@
 			 ("melpa-stable" . "https://stable.melpa.org/packages/")
 			 ("elpa" . "https://elpa.gnu.org/packages/")))
 
+;; Uncomment following lines to set up emacs with GUI functionality (uses python and vue)
+;;(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+;;(require 'eaf)
+;;(require 'eaf-browser)
+;;(setq eaf-python-command "/usr/local/bin/python3") ;; Usually default python for OSX is 2.7 which does not have support for QT python library
+
 (package-initialize)			;
 ;;(add-to-list 'package-archives ' t)
 
