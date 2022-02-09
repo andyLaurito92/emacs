@@ -13,10 +13,10 @@
 			 ("elpa" . "https://elpa.gnu.org/packages/")))
 
 ;; Uncomment following lines to set up emacs with GUI functionality (uses python and vue)
-;;(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+(add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
 ;;(require 'eaf)
 ;;(require 'eaf-browser)
-;;(setq eaf-python-command "/usr/local/bin/python3") ;; Usually default python for OSX is 2.7 which does not have support for QT python library
+;;(setq eaf-python-command "/usr/local/bin/python3")
 
 (package-initialize)			;
 ;;(add-to-list 'package-archives ' t)
@@ -29,7 +29,7 @@
  '(custom-safe-themes
    '("da186cce19b5aed3f6a2316845583dbee76aea9255ea0da857d1c058ff003546" "234dbb732ef054b109a9e5ee5b499632c63cc24f7c2383a849815dacc1727cb6" "fe1c13d75398b1c8fd7fdd1241a55c286b86c3e4ce513c4292d01383de152cb7" default))
  '(package-selected-packages
-   '(doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##)))
+   '(paredit csv-mode yaml-mode org-bullets org-pomodoro sound-wav typescript-mode evil doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -78,8 +78,8 @@
 (tool-bar-mode -1) ;; Disable toolbar
 (set-fringe-mode 10)
 
-(unless package-archive-contents
-  (package-refresh-contents))
+;(unless package-archive-contents
+(package-refresh-contents)
 
 ;; Initialize use-package on non-Linux platforms
 (unless (package-installed-p 'use-package)
@@ -115,6 +115,7 @@
   :ensure t
   :init (doom-modeline-mode 1)
   :custom ((doom-modeline-height 10)))
+(setq find-file-visit-truename t)
 
 (use-package doom-themes)
 
@@ -152,3 +153,80 @@
   ([remap describe-key] . helpful-key))
 (put 'erase-buffer 'disabled nil)
 
+;; Download Evil
+(unless (package-installed-p 'evil)
+  (package-install 'evil))
+
+;; Enable Evil
+(require 'evil)
+(evil-mode 1)
+(put 'narrow-to-region 'disabled nil)
+
+(global-set-key "\C-cw" 'compare-windows)
+(global-unset-key "\C-xf")
+
+
+(defun andy/org-mode-setup ()
+  (org-indent-mode)
+  (variable-pitch-mode 1)
+  (auto-fill-mode 0)
+  (visual-line-mode 1)
+  (setq evil-auto-indent nil))
+
+(use-package org
+  :hook (org-mode . andy/org-mode-setup)
+  :config
+  (setq org-ellipsis " ⤵"
+	org-hide-mphasis-markers t))
+
+(use-package org-bullets
+  :after org
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("•" "◦" "▸" "▹")))
+
+(setq-default frame-title-format "%b (%f)")
+
+(add-hook 'lisp-mode-hook (lambda () (paredit-mode +1))) 
+
+
+(require 'yaml-mode)
+(require 'paredit)
+(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+
+(display-time)
+
+;; Use y or n instead of yes or not
+(fset 'yes-or-no-p 'y-or-n-p)
+
+
+;;-----------------------
+;; Use paredit in the minibuffer -->http://emacsredux.com/blog/2013/04/18/evaluate-emacs-lisp-in-the-minibuffer
+;;-----------------------
+(add-hook 'minibufffer-setup-hook 'conditionally-enable-paredit-mode)
+(defvar paredit-minibuffer-commands '(eval-expression
+                     pp-eval-expression
+                     eval-expression-with-eldoc
+                     ibuffer-do-eval
+                     ibuffer-do-view-and-eval)
+"Interactive commands for which paredit should be enabled in the minibuffer.")
+(defun conditionally-enable-paredit-mode ()
+  "Enable paredit during lisp related minibuffer commands."
+  (if (memq this-command paredit-minibuffer-commands)
+      (enable-paredit-mode)))
+;;------------------------
+;; Add paredit to ...
+;;------------------------
+(add-hook 'slime-repl-mode-hook (lambda () (paredit-mode +1)))
+(add-hook 'emacs-lisp-mode-hook (lambda () (paredit-mode +1)))
+(add-hook 'lisp-mode-hook (lambda () (paredit-mode +1)))
+(add-hook 'lisp-interaction-mode-hook (lambda () (paredit-mode +1)))
+;;--------------------------------
+;; Enable some handy paredit functions in all prog modes. REM to get it!
+;;--------------------------------
+(require 'paredit-everywhere)
+(add-hook 'prog-mode-hook 'paredit-everywhere-mode)
+(add-hook 'css-mode-hook 'paredit-everywhere-mode)
+
+;; REMEMBER sync name/provide statment this setup/init file's when done
+(provide 'txe-paredit-init)
