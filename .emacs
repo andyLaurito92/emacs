@@ -14,8 +14,9 @@
 
 ;; Uncomment following lines to set up emacs with GUI functionality (uses python and vue)
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
-;;(require 'eaf)
-;;(require 'eaf-browser)
+(require 'eaf)
+(require 'eaf-browser)
+(require 'eaf-demo)
 ;;(setq eaf-python-command "/usr/local/bin/python3")
 
 (package-initialize)			;
@@ -27,9 +28,59 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("da186cce19b5aed3f6a2316845583dbee76aea9255ea0da857d1c058ff003546" "234dbb732ef054b109a9e5ee5b499632c63cc24f7c2383a849815dacc1727cb6" "fe1c13d75398b1c8fd7fdd1241a55c286b86c3e4ce513c4292d01383de152cb7" default))
+   '("b9e9ba5aeedcc5ba8be99f1cc9301f6679912910ff92fdf7980929c2fc83ab4d" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "da186cce19b5aed3f6a2316845583dbee76aea9255ea0da857d1c058ff003546" "234dbb732ef054b109a9e5ee5b499632c63cc24f7c2383a849815dacc1727cb6" "fe1c13d75398b1c8fd7fdd1241a55c286b86c3e4ce513c4292d01383de152cb7" default))
  '(package-selected-packages
-   '(paredit csv-mode yaml-mode org-bullets org-pomodoro sound-wav typescript-mode evil doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##)))
+   '(wgrep eglot-java eglot telega rainbow-identifiers visual-fill-column osx-browse exec-path-from-shell switch-window buffer-move magit projectile smart-mode-line-powerline-theme paredit csv-mode yaml-mode org-bullets org-pomodoro sound-wav typescript-mode evil doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##))
+ '(sml/mode-width (if (eq (powerline-current-separator) 'arrow) 'right 'full))
+ '(sml/pos-id-separator
+   '(""
+     (:propertize " " face powerline-active1)
+     (:eval
+      (propertize " " 'display
+		  (funcall
+		   (intern
+		    (format "powerline-%s-%s"
+			    (powerline-current-separator)
+			    (car powerline-default-separator-dir)))
+		   'powerline-active1 'powerline-active2)))
+     (:propertize " " face powerline-active2)))
+ '(sml/pos-minor-modes-separator
+   '(""
+     (:propertize " " face powerline-active1)
+     (:eval
+      (propertize " " 'display
+		  (funcall
+		   (intern
+		    (format "powerline-%s-%s"
+			    (powerline-current-separator)
+			    (cdr powerline-default-separator-dir)))
+		   'powerline-active1 'sml/global)))
+     (:propertize " " face sml/global)))
+ '(sml/pre-id-separator
+   '(""
+     (:propertize " " face sml/global)
+     (:eval
+      (propertize " " 'display
+		  (funcall
+		   (intern
+		    (format "powerline-%s-%s"
+			    (powerline-current-separator)
+			    (car powerline-default-separator-dir)))
+		   'sml/global 'powerline-active1)))
+     (:propertize " " face powerline-active1)))
+ '(sml/pre-minor-modes-separator
+   '(""
+     (:propertize " " face powerline-active2)
+     (:eval
+      (propertize " " 'display
+		  (funcall
+		   (intern
+		    (format "powerline-%s-%s"
+			    (powerline-current-separator)
+			    (cdr powerline-default-separator-dir)))
+		   'powerline-active2 'powerline-active1)))
+     (:propertize " " face powerline-active1)))
+ '(sml/pre-modes-separator (propertize " " 'face 'sml/modes)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -39,33 +90,34 @@
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
 
 ;; Turn on dracula
-(load-theme 'dracula t)
+;(load-theme 'dracula t)
 
 ;;customize theme
 ;; If you want to use powerline, (require 'powerline) must be
 ;; before (require 'moe-theme).
-(add-to-list 'load-path "~/.emacs.d/PATH/TO/powerline/")
+;(add-to-list 'load-path "~/.emacs.d/PATH/TO/powerline/")
 (require 'powerline)
+(powerline-default-theme)
 
 ;; Moe-theme
-(add-to-list 'custom-theme-load-path "~/.emacs.d/elpa/moe-theme-1.0.1")
-(add-to-list 'load-path "~/.emacs.d/elpa/moe-theme-1.0.1")
-(require 'moe-theme)
+;; (add-to-list 'custom-theme-load-path "~/.emacs.d/elpa/moe-theme-1.0.1")
+;; (add-to-list 'load-path "~/.emacs.d/elpa/moe-theme-1.0.1")
+;; (require 'moe-theme)
 
-;; Show highlighted buffer-id as decoration. (Default: nil)
-(setq moe-theme-highlight-buffer-id t)
+;; ;; Show highlighted buffer-id as decoration. (Default: nil)
+;; (setq moe-theme-highlight-buffer-id t)
 
-;; Resize titles (optional).
-(setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
-(setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
-(setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
+;; ;; Resize titles (optional).
+;; (setq moe-theme-resize-markdown-title '(1.5 1.4 1.3 1.2 1.0 1.0))
+;; (setq moe-theme-resize-org-title '(1.5 1.4 1.3 1.2 1.1 1.0 1.0 1.0 1.0))
+;; (setq moe-theme-resize-rst-title '(1.5 1.4 1.3 1.2 1.1 1.0))
 
-;; Choose a color for mode-line.(Default: blue)
-;;(moe-theme-set-color 'green)
+;; ;; Choose a color for mode-line.(Default: blue)
+;; ;;(moe-theme-set-color 'green)
 
-;; Finally, apply moe-theme now.
-;; Choose what you like, (moe-light) or (moe-dark)
-(moe-dark)
+;; ;; Finally, apply moe-theme now.
+;; ;; Choose what you like, (moe-light) or (moe-dark)
+;; (moe-dark)
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
@@ -114,10 +166,28 @@
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1)
+  :hook (after-init . doom-modeline-mode)
   :custom ((doom-modeline-height 10)))
 (setq find-file-visit-truename t)
+(doom-modeline-mode 1)
 
-(use-package doom-themes)
+(use-package doom-themes
+  :ensure t
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+    (load-theme 'doom-dracula t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-henna") ; use "doom-colors" for less minimal icon theme
+  (doom-themes-treemacs-config)
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -230,3 +300,34 @@
 
 ;; REMEMBER sync name/provide statment this setup/init file's when done
 (provide 'txe-paredit-init)
+
+;; Set transparency
+(set-frame-parameter (selected-frame) 'alpha '(93 . 50))
+(add-to-list 'default-frame-alist '(alpha . (85 . 50)))
+
+(require 'switch-window)
+(global-set-key (kbd "C-x o") 'switch-window)
+
+(add-to-list 'load-path "/Users/andylaurito/repositories/public-githubs/hangups.el/")
+(require 'hangups)
+
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+
+(require 'osx-browse)
+(osx-browse-mode 1)
+
+(require 'telega)
+
+(use-package eglot :ensure t)
+(add-hook 'foo-mode-hook 'eglot-ensure)
+
+(eval-after-load 'eglot-java
+  (progn
+    (require 'eglot-java)
+    '(eglot-java-init)))
+
+(add-to-list 'eglot-server-programs
+             '(python-mode "pylsp"))
+
+(require 'wgrep)
