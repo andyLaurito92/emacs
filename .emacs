@@ -14,9 +14,9 @@
 
 ;; Uncomment following lines to set up emacs with GUI functionality (uses python and vue)
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
-(require 'eaf)
-(require 'eaf-browser)
-(require 'eaf-demo)
+;; (require 'eaf)
+;; (require 'eaf-browser)
+;; (require 'eaf-demo)
 ;;(setq eaf-python-command "/usr/local/bin/python3")
 
 (package-initialize)			;
@@ -30,7 +30,7 @@
  '(custom-safe-themes
    '("b9e9ba5aeedcc5ba8be99f1cc9301f6679912910ff92fdf7980929c2fc83ab4d" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "da186cce19b5aed3f6a2316845583dbee76aea9255ea0da857d1c058ff003546" "234dbb732ef054b109a9e5ee5b499632c63cc24f7c2383a849815dacc1727cb6" "fe1c13d75398b1c8fd7fdd1241a55c286b86c3e4ce513c4292d01383de152cb7" default))
  '(package-selected-packages
-   '(wgrep eglot-java eglot telega rainbow-identifiers visual-fill-column osx-browse exec-path-from-shell switch-window buffer-move magit projectile smart-mode-line-powerline-theme paredit csv-mode yaml-mode org-bullets org-pomodoro sound-wav typescript-mode evil doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##))
+   '(impatient-mode markdown-mode seeing-is-believing ruby-electric ruby-test-mode company-inf-ruby inf-ruby jedi wgrep eglot-java eglot telega rainbow-identifiers visual-fill-column osx-browse exec-path-from-shell switch-window buffer-move magit projectile smart-mode-line-powerline-theme paredit csv-mode yaml-mode org-bullets org-pomodoro sound-wav typescript-mode evil doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##))
  '(sml/mode-width (if (eq (powerline-current-separator) 'arrow) 'right 'full))
  '(sml/pos-id-separator
    '(""
@@ -331,3 +331,27 @@
              '(python-mode "pylsp"))
 
 (require 'wgrep)
+
+(setq js-indent-level 2)
+
+(setq seeing-is-believing-prefix "C-c")
+(require 'seeing-is-believing)
+(add-hook 'ruby-mode-hook 'seeing-is-believing)
+
+(autoload 'inf-ruby-minor-mode "inf-ruby" "Run an inferior Ruby process" t)
+(add-hook 'ruby-mode-hook 'inf-ruby-minor-mode)
+
+(setq auto-save-file-name-transforms
+          `((".*" ,(concat user-emacs-directory "auto-save/") t))) 
+
+(use-package markdown-mode
+  :ensure t
+  :mode ("README\\.md\\'" . gfm-mode)
+  :init (setq markdown-command "multimarkdown"))
+
+
+(defun my/create-scratch-file (file-extension)
+  "Creates a temporary file with the FILE-EXTENSION provided"
+  (interactive "sEnter file extension: ")
+  (let ((temp-file (make-temp-file "" nil file-extension)))
+    (find-file-other-window temp-file)))
