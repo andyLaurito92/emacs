@@ -11,6 +11,8 @@
 			 ("org" . "https://orgmode.org/elpa/")
 			 ("melpa-stable" . "https://stable.melpa.org/packages/")
 			 ("elpa" . "https://elpa.gnu.org/packages/")))
+;; Make backup files go to another directory
+(setq backup-directory-alist `(("." . "~/.saves")))
 
 ;; Uncomment following lines to set up emacs with GUI functionality (uses python and vue)
 (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
@@ -30,7 +32,7 @@
  '(custom-safe-themes
    '("b9e9ba5aeedcc5ba8be99f1cc9301f6679912910ff92fdf7980929c2fc83ab4d" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "da186cce19b5aed3f6a2316845583dbee76aea9255ea0da857d1c058ff003546" "234dbb732ef054b109a9e5ee5b499632c63cc24f7c2383a849815dacc1727cb6" "fe1c13d75398b1c8fd7fdd1241a55c286b86c3e4ce513c4292d01383de152cb7" default))
  '(package-selected-packages
-   '(impatient-mode markdown-mode seeing-is-believing ruby-electric ruby-test-mode company-inf-ruby inf-ruby jedi wgrep eglot-java eglot telega rainbow-identifiers visual-fill-column osx-browse exec-path-from-shell switch-window buffer-move magit projectile smart-mode-line-powerline-theme paredit csv-mode yaml-mode org-bullets org-pomodoro sound-wav typescript-mode evil doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##))
+   '(treemacs-evil treemacs dir-treeview elpy ob-ipython lsp-jedi dockerfile-mode impatient-mode markdown-mode seeing-is-believing ruby-electric ruby-test-mode company-inf-ruby inf-ruby jedi wgrep eglot-java eglot telega rainbow-identifiers visual-fill-column osx-browse exec-path-from-shell switch-window buffer-move magit projectile smart-mode-line-powerline-theme paredit csv-mode yaml-mode org-bullets org-pomodoro sound-wav typescript-mode evil doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##))
  '(sml/mode-width (if (eq (powerline-current-separator) 'arrow) 'right 'full))
  '(sml/pos-id-separator
    '(""
@@ -330,6 +332,11 @@
 (add-to-list 'eglot-server-programs
              '(python-mode "pylsp"))
 
+;; (setq 'jedi:server-command 
+;;       '("/usr/local/bin/python3" "/Users/andylaurito/miniconda3/envs/datapractice/bin/python"))
+;; (add-hook 'python-mode-hook 'jedi:setup)
+;; (setq jedi:complete-on-dot t)                 ; optional
+
 (require 'wgrep)
 
 (setq js-indent-level 2)
@@ -338,8 +345,8 @@
 (require 'seeing-is-believing)
 (add-hook 'ruby-mode-hook 'seeing-is-believing)
 
-(autoload 'inf-ruby-minor-mode "inf-ruby" "Run an inferior Ruby process" t)
-(add-hook 'ruby-mode-hook 'inf-ruby-minor-mode)
+;(autoload 'inf-ruby-minor-mode "inf-ruby" "Run an inferior Ruby process" t)
+;(add-hook 'ruby-mode-hook 'inf-ruby-minor-mode)
 
 (setq auto-save-file-name-transforms
           `((".*" ,(concat user-emacs-directory "auto-save/") t))) 
@@ -355,3 +362,85 @@
   (interactive "sEnter file extension: ")
   (let ((temp-file (make-temp-file "" nil file-extension)))
     (find-file-other-window temp-file)))
+
+;; (setq inf-ruby-eval-binding "(defined?(IRB.conf) && IRB.conf[:MAIN_CONTEXT] && IRB.conf[:MAIN_CONTEXT].workspace.binding) || (defined?(Pry) && Pry.toplevel_binding)")
+
+(use-package inf-ruby
+  :ensure t
+  :init
+  (add-hook 'ruby-mode-hook 'inf-ruby-minor-mode))
+
+;; Setting up conda environments
+(require 'conda)
+;; if you want eshell support, include:
+;;(conda-env-initialize-eshell)
+
+;; if you want auto-activation (see below for details), include:
+;;(conda-env-autoactivate-mode t)
+
+;; if you want to automatically activate a conda environment on the opening of a file:
+;; ;;(setq conda-env-home-directory "<path-to>/anaconda3")
+
+;; ;;get current environment--from environment variable CONDA_DEFAULT_ENV
+;; (conda-env-activate 'getenv "CONDA_DEFAULT_ENV")
+;; ;;(conda-env-autoactivate-mode t)
+;; (setq-default mode-line-format (cons mode-line-format '(:exec conda-env-current-name)))
+
+;; ob-ipython integration
+(require 'ob-ipython)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((ipython . t)
+   ;; other languages..
+   ))
+
+(require 'ein)
+(require 'ein-notebook)
+;;(require 'ein-subpackages)
+
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable))
+
+(load "elpy")
+;;(load "elpy-rpc")
+(load "elpy-shell")
+(load "elpy-profile")
+(load "elpy-refactor")
+
+;; Use the corrent virtual-env; Remember to select the proper conda env
+(setq elpy-rpc-virtualenv-path 'current)
+(setenv "PYTHONIOENCODING" "utf-8")
+(add-to-list 'process-coding-system-alist '("python" . (utf-8 . utf-8)))
+(add-to-list 'process-coding-system-alist '("elpy" . (utf-8 . utf-8)))
+(add-to-list 'process-coding-system-alist '("flake8" . (utf-8 . utf-8)))
+
+;; This config comes from here https://medium.com/@aiguofer/managing-a-python-development-environment-in-emacs-43897fd48c6a
+;; (use-package elpy
+;;     ;:straight t
+;;     :bind
+;;     (:map elpy-mode-map
+;;           ("C-M-n" . elpy-nav-forward-block)
+;;           ("C-M-p" . elpy-nav-backward-block))
+;;     :hook ((elpy-mode . flycheck-mode)
+;;            (elpy-mode . (lambda ()
+;;                           (set (make-local-variable 'company-backends)
+;;                                '((elpy-company-backend :with company-yasnippet))))))
+;;     :init
+;;     (elpy-enable)
+;;     :config
+;;     (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+;;     ; fix for MacOS, see https://github.com/jorgenschaefer/elpy/issues/1550
+;;     (setq elpy-shell-echo-output nil)
+;;     ;;(setq elpy-rpc-python-command "python3")
+;;     (setq elpy-rpc-timeout 2))
+;; This fixes the bux ‘python-shell-interpreter’ doesn’t seem to support readline, yet ‘python-shell-completion-native-enable’ was t
+;; For more info check this link https://emacs.stackexchange.com/questions/30082/your-python-shell-interpreter-doesn-t-seem-to-support-readline
+;; Be aware that readline is deprecated, so one of the answers in the above blog doesn't count
+(setq python-shell-completion-native-enable nil)
+
+;; Bind dir-tree to F9
+(global-set-key (kbd "<f9>") 'dir-treeview)
+(load-theme 'dir-treeview-pleasant t)
+

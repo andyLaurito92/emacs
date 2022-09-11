@@ -1,0 +1,7 @@
+** TODO
+Check the following packages
+- [[https://www.emacswiki.org/emacs/wgrep.el][wgrep]]
+- [[https://elpa.gnu.org/packages/hydra.html][hydra]]
+- [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Compilation-Mode.html][compilation-mode]]
+- [[https://company-mode.github.io/][company-mode]]
+- 
