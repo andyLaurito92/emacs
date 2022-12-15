@@ -483,3 +483,7 @@
   (require 'org-roam-dailies)
   (org-roam-db-autosync-mode))
 
+;; Solves the problem of not being able to write brackets or curly brackets
+;; Watch out that paredit mode maps right-option + ] with something else
+(setq mac-option-key-is-meta t)
+(setq mac-right-option-modifier nil)
