@@ -487,3 +487,24 @@
 ;; Watch out that paredit mode maps right-option + ] with something else
 (setq mac-option-key-is-meta t)
 (setq mac-right-option-modifier nil)
+
+(use-package dashboard
+  :config
+  (dashboard-setup-startup-hook)
+  ;; Set the title
+  (setq dashboard-banner-logo-title "Welcome back Andy :)")
+  ;; Set the banner
+  (setq dashboard-startup-banner 'logo)
+  ;; Value can be
+  ;; - nil to display no banner
+  ;; - 'official which displays the official emacs logo
+  ;; - 'logo which displays an alternative emacs logo
+  ;; - 1, 2 or 3 which displays one of the text banners
+  ;; - "path/to/your/image.gif", "path/to/your/image.png" or "path/to/your/text.txt" which displays whatever gif/image/text you would prefer
+  ;; - a cons of '("path/to/your/image.png" . "path/to/your/text.txt")
+
+  ;; Content is not centered by default. To center, set
+  (setq dashboard-center-content t)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-set-navigator t))
