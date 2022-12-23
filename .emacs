@@ -488,6 +488,16 @@
 (setq mac-option-key-is-meta t)
 (setq mac-right-option-modifier nil)
 
+(use-package projectile
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
+  :init
+  (setq projectile-switch-project-action #'projectile-dired))
+(use-package page-break-lines)
+(use-package all-the-icons)
+
 (use-package dashboard
   :config
   (dashboard-setup-startup-hook)
@@ -508,3 +518,6 @@
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-set-navigator t))
+
+;; Set default csv-separators
+(setq csv-separators '("," ";" "|" " " "	"))
