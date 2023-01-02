@@ -494,7 +494,10 @@
   :bind-keymap
   ("C-c p" . projectile-command-map)
   :init
+  (when (file-directory-p "~/repos")
+    (setq projectile-project-search-path '("~/repos")))
   (setq projectile-switch-project-action #'projectile-dired))
+
 (use-package page-break-lines)
 (use-package all-the-icons)
 
