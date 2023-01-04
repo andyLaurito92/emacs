@@ -32,7 +32,7 @@
  '(custom-safe-themes
    '("b9e9ba5aeedcc5ba8be99f1cc9301f6679912910ff92fdf7980929c2fc83ab4d" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" "a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "da186cce19b5aed3f6a2316845583dbee76aea9255ea0da857d1c058ff003546" "234dbb732ef054b109a9e5ee5b499632c63cc24f7c2383a849815dacc1727cb6" "fe1c13d75398b1c8fd7fdd1241a55c286b86c3e4ce513c4292d01383de152cb7" default))
  '(package-selected-packages
-   '(treemacs-evil treemacs dir-treeview elpy ob-ipython lsp-jedi dockerfile-mode impatient-mode markdown-mode seeing-is-believing ruby-electric ruby-test-mode company-inf-ruby inf-ruby jedi wgrep eglot-java eglot telega rainbow-identifiers visual-fill-column osx-browse exec-path-from-shell switch-window buffer-move magit projectile smart-mode-line-powerline-theme paredit csv-mode yaml-mode org-bullets org-pomodoro sound-wav typescript-mode evil doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##))
+   '(counsel-projectile grip-mode markdown-preview-mode markdown-preview-eww treemacs-projectile projectile projectile-codesearch projectile-ripgrep spaceline-all-the-icons all-the-icons-ivy treemacs-all-the-icons org-roam treemacs-evil treemacs dir-treeview elpy ob-ipython lsp-jedi dockerfile-mode impatient-mode markdown-mode seeing-is-believing ruby-electric ruby-test-mode company-inf-ruby inf-ruby jedi wgrep eglot-java eglot telega rainbow-identifiers visual-fill-column osx-browse exec-path-from-shell switch-window buffer-move magit projectile smart-mode-line-powerline-theme paredit csv-mode yaml-mode org-bullets org-pomodoro sound-wav typescript-mode evil doom-themes helpful ivy-rich which-key rainbow-delimiters rainbow-delimeters doom-modeline counsel swiper ivy command-log-mode use-package moe-theme dracula-theme ##))
  '(sml/mode-width (if (eq (powerline-current-separator) 'arrow) 'right 'full))
  '(sml/pos-id-separator
    '(""
@@ -143,7 +143,6 @@
 (setq use-package-always-ensure t)
 
 (use-package command-log-mode)
-(use-package counsel)
 
 (use-package ivy
   :diminish
@@ -310,9 +309,6 @@
 (require 'switch-window)
 (global-set-key (kbd "C-x o") 'switch-window)
 
-(add-to-list 'load-path "/Users/andylaurito/repositories/public-githubs/hangups.el/")
-(require 'hangups)
-
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
 
@@ -323,12 +319,6 @@
 
 (use-package eglot :ensure t)
 (add-hook 'foo-mode-hook 'eglot-ensure)
-
-(eval-after-load 'eglot-java
-  (progn
-    (require 'eglot-java)
-    '(eglot-java-init)))
-
 (add-to-list 'eglot-server-programs
              '(python-mode "pylsp"))
 
@@ -441,15 +431,14 @@
 (setq python-shell-completion-native-enable nil)
 
 ;; Bind dir-tree to F9
-(global-set-key (kbd "<f9>") 'dir-treeview)
-(load-theme 'dir-treeview-pleasant t)
+;; (global-set-key (kbd "<f9>") 'dir-treeview)
+;; (load-theme 'dir-treeview-pleasant t)
 
 ;; paredit autoload
 (autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
 (add-hook 'clojure-mode 'enable-paredit-mode)
 (add-hook 'clojurescript-mode 'enable-paredit-mode)
 
-(require 'org-roam-dailies)
 (use-package org-roam
   :ensure t
   :custom
@@ -498,6 +487,9 @@
     (setq projectile-project-search-path '("~/repos")))
   (setq projectile-switch-project-action #'projectile-dired))
 
+(use-package counsel-projectile
+  :config (counsel-projectile-mode))
+
 (use-package page-break-lines)
 (use-package all-the-icons)
 
@@ -524,3 +516,11 @@
 
 ;; Set default csv-separators
 (setq csv-separators '("," ";" "|" " " "	"))
+
+(global-set-key (kbd "C-c t") 'treemacs)
+(setq treemacs-projectile-follow-mode t)
+
+(use-package grip-mode
+  :ensure t 
+  :hook ((markdown-mode org-mode) . grip-mode)
+  :config (setq grip-preview-use-webkit t))
