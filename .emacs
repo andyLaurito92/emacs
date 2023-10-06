@@ -204,6 +204,7 @@
   (ivy-rich-mode 1))
 
 (use-package counsel
+  :ensure t
   :bind (("M-x" . counsel-M-x)
 	 ("C-x b" . counsel-ibuffer)
 	 ("C-x C-f" . counsel-find-file)
