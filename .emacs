@@ -526,3 +526,7 @@
   :ensure t 
   :hook ((markdown-mode org-mode) . grip-mode)
   :config (setq grip-preview-use-webkit t))
+
+(use-package magit
+  :ensure t
+  :bind (("C-x g" . magit-status)))
