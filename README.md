@@ -12,4 +12,5 @@ If having issues with fonts, just run `M-x all-the-icons-install-fonts`
 2. Open Emacs and run: M-x package-refresh-contents
 3. M-x package-install RET dracula-theme
 4. M-x package-install RET powerline
-5. Take a look at https://github.com/emacs-eaf/emacs-application-framework
+5. Remember to install elpy python libraries as explained [here](https://elpy.readthedocs.io/en/latest/introduction.html#installation)
+6. Take a look at https://github.com/emacs-eaf/emacs-application-framework
