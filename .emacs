@@ -542,6 +542,9 @@
 (setq mac-option-key-is-meta t)
 (setq mac-right-option-modifier nil)
 
+(use-package ripgrep)
+(use-package rg)
+
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode)
