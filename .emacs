@@ -596,3 +596,33 @@
 (use-package magit
   :ensure t
   :bind (("C-x g" . magit-status)))
+
+
+;;;;;;; Installing straight.el, alternative to Emacs0 built in package manager. It can be used w/use-package
+(defvar bootstrap-version)
+(let ((bootstrap-file
+     (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+     (bootstrap-version 5))
+ (unless (file-exists-p bootstrap-file)
+   (with-current-buffer
+       (url-retrieve-synchronously
+       "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+       'silent 'inhibit-cookies)
+     (goto-char (point-max))
+     (eval-print-last-sexp)))
+ (load bootstrap-file nil 'nomessage))
+
+;;;;; Github Copilot -- Follow instructions here: https://github.com/copilot-emacs/copilot.el?tab=readme-ov-file
+(use-package editorconfig :ensure t)
+(use-package jsonrpc)
+(use-package dash)
+(use-package s)
+
+(use-package copilot
+  :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
+  :ensure t)
+
+(add-hook 'prog-mode-hook 'copilot-mode)
+(define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+
