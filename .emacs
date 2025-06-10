@@ -626,3 +626,19 @@
 (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
 (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
 
+;; Configuring ollama for local run
+(use-package gptel)
+(gptel-make-ollama "Ollama"             ;Any name of your choosing
+  :host "127.0.0.1:11434"               ;Where it's running
+  :stream t                             ;Stream responses
+  :models '(llama3.2:latest))          ;List of models
+
+
+;; OPTIONAL configuration
+(setq
+ gptel-model 'mistral:latest
+ gptel-backend (gptel-make-ollama "Ollama"
+                 :host "localhost:11434"
+                 :stream t
+                 :models '(mistral:latest)))
+
