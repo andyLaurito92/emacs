@@ -636,9 +636,9 @@
 
 ;; OPTIONAL configuration
 (setq
- gptel-model 'mistral:latest
+ gptel-model 'llama3.2:latest
  gptel-backend (gptel-make-ollama "Ollama"
                  :host "localhost:11434"
                  :stream t
-                 :models '(mistral:latest)))
+                 :models '(llama3.2:latest)))
 
