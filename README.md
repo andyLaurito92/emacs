@@ -1,5 +1,24 @@
 Personal emacs config
 
+
+====================================
+NEW
+====================================
+
+I'm rewriting my .init emacs focusing on modules. The idea is to later be able
+to split the huge .init.el file into smaller files :). So far good start, but still
+having some issues. Things to do:
+
+- treemacs projectile
+- python shell interpreter
+- to keep revisitign
+
+
+====================================
+OLD
+====================================
+
+
 Switching in OSX to use doom-emacs. I followed this installation steps: https://github.com/doomemacs/doomemacs/blob/develop/docs/getting_started.org#with-homebrew (installed emacs-mac)
 
 If having issues with fonts, just run `M-x all-the-icons-install-fonts`
