@@ -1,4 +1,4 @@
-;;; init.el --- Robust Python & Evil Configuration -*- lexical-binding: t; -*-
+;; init.el --- Robust Python & Evil Configuration -*- lexical-binding: t; -*-
 
 ;; Disable package.el completely
 (setq package-enable-at-startup nil)
@@ -59,19 +59,32 @@
 (column-number-mode)
 (global-display-line-numbers-mode t)
 
+;; Set default frame size (Height x Width)
+(add-to-list 'default-frame-alist '(height . 60))
+(add-to-list 'default-frame-alist '(width . 170))
+
+;; Optional: If you want the current frame to resize immediately on load
+(set-frame-size (selected-frame) 170 50)
+
+
 ;; ----------------------------------------
 ;; 5. Theme & Modeline
 ;; ----------------------------------------
 (use-package doom-themes
+  :demand t
+  :init
+  (load-theme 'doom-dracula t)
   :config
-  (setq doom-themes-enable-bold t doom-themes-enable-italic t)
-  (load-theme 'doom-molokai t)
+  (setq doom-themes-enable-bold t 
+        doom-themes-enable-italic t)
   (doom-themes-org-config))
 
 (use-package doom-modeline
+  :demand t
   :hook (after-init . doom-modeline-mode)
-  :custom (doom-modeline-height 15))
-
+  :config
+  (setq doom-modeline-height 15)
+  )
 ;; ----------------------------------------
 ;; 6. Evil (Vim emulation)
 ;; ----------------------------------------
@@ -140,20 +153,6 @@
 (use-package treemacs-projectile :after (treemacs projectile))
 (use-package treemacs-evil :after (treemacs evil))
 (use-package all-the-icons :if (display-graphic-p))
-
-;; ----------------------------------------
-;; 9. Org Mode
-;; ----------------------------------------
-(use-package org
-  :pin gnu
-  :config
-  (setq org-startup-indented t
-        org-hide-leading-stars t
-        org-agenda-files '("~/org")))
-
-(use-package org-bullets
-  :after org
-  :hook (org-mode . org-bullets-mode))
 
 ;; ----------------------------------------
 ;; 10. Python Development Module (The Big One)
@@ -231,5 +230,222 @@
     (kbd "g d") 'lsp-find-definition
     (kbd "g r") 'lsp-find-references
     (kbd "K")   'lsp-ui-doc-glance))
+
+
+;; ----------------------------------------
+;; 13. Lisp Development & Structural Editing
+;; ----------------------------------------
+
+;; Paredit: Provides structural editing (keeps parentheses balanced)
+(use-package paredit
+  :hook ((emacs-lisp-mode 
+          lisp-mode 
+          clojure-mode 
+          scheme-mode 
+          lisp-interaction-mode) . enable-paredit-mode)
+  :config
+  ;; Enable paredit in the minibuffer for eval-expression
+  (add-hook 'minibuffer-setup-hook 
+            (lambda ()
+              (when (memq this-command '(eval-expression pp-eval-expression))
+                (enable-paredit-mode)))))
+
+;; Paredit Everywhere: Enables paredit features in non-lisp modes (strings, etc.)
+(use-package paredit-everywhere
+  :hook (prog-mode . paredit-everywhere-mode))
+
+;; SLIME: The Superior Lisp Interaction Mode for Common Lisp
+(use-package slime
+  :init
+  (setq inferior-lisp-program "sbcl") ; Matches your old config
+  :config
+  ;; Load the quicklisp helper if it exists
+  (let ((slime-helper "~/quicklisp/slime-helper.el"))
+    (when (file-exists-p (expand-file-name slime-helper))
+      (load (expand-file-name slime-helper))))
+  
+  ;; Ensure paredit works inside the SLIME REPL
+  (add-hook 'slime-repl-mode-hook #'enable-paredit-mode))
+
+;; ----------------------------------------
+;; 14. Org Mode & Roam (Writing & Notes)
+;; ----------------------------------------
+
+(use-package org
+  :straight (:type built-in)
+  :hook (org-mode . (lambda ()
+                      (org-indent-mode)
+                      (variable-pitch-mode 1)
+                      (visual-line-mode 1)))
+  :config
+  (setq org-ellipsis " ⤵"
+        org-hide-mphasis-markers t
+        org-startup-indented t
+        org-hide-leading-stars t
+        org-agenda-files '("~/org")))
+
+(use-package org-bullets
+  :after org
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("•" "◦" "▸" "▹")))
+
+(use-package org-roam
+  :after org
+  :custom
+  (org-roam-directory (file-truename "~/RoamNotes"))
+  (org-roam-completion-everywhere t)
+  ;; This tells Emacs that C-c n is a prefix for ALL org-roam commands
+  :bind-keymap ("C-c n" . org-roam-mode-map)
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         :map org-mode-map
+         ("C-M-i" . completion-at-point))
+  :config
+  (setq org-roam-capture-templates
+        '(("d" "default" plain "%?" 
+           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+date: %U\n")
+           :unnarrowed t)
+          ("b" "book notes" plain 
+           "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
+           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)))
+
+  (setq org-roam-dailies-capture-templates
+        '(("d" "default" entry "* %<%I:%M %p>: %?" 
+           :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+
+  (org-roam-db-autosync-mode)
+  (require 'org-roam-dailies))
+
+
+;; ----------------------------------------
+;; 15. AI Assistance (Copilot & Ollama)
+;; ----------------------------------------
+
+;; GPTel: Interface for Ollama/Local LLMs
+(use-package gptel
+  :config
+  (setq gptel-model 'llama3.2:latest
+        gptel-backend (gptel-make-ollama "Ollama" 
+                                         :host "localhost:11434" 
+                                         :stream t 
+                                         :models '(llama3.2:latest))))
+
+;; Github Copilot
+(use-package copilot
+  :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
+  :hook (prog-mode . copilot-mode)
+  :bind (:map copilot-completion-map
+              ("<tab>" . copilot-accept-completion)
+              ("TAB" . copilot-accept-completion)
+              ("C-f" . copilot-accept-completion-by-word)
+              ("M-n" . copilot-next-completion)
+              ("M-p" . copilot-previous-completion))
+  :config
+  ;; Ensure dependencies are available
+  (require 'editorconfig)
+  (require 'dash)
+  (require 's)
+  (require 'f))
+
+;; ----------------------------------------
+;; 16. UI Polish & Quality of Life
+;; ----------------------------------------
+
+;; Use y/n instead of yes/no
+(fset 'yes-or-no-p 'y-or-n-p)
+
+;; 1. Setup Initial Transparency
+(defvar andy/opacity-level 85)
+(set-frame-parameter (selected-frame) 'alpha `(,andy/opacity-level . 85))
+(add-to-list 'default-frame-alist `(alpha . (,andy/opacity-level . 50)))
+
+;; 2. The Toggle Function
+(defun andy/toggle-transparency ()
+  "Toggle between transparent and opaque frames."
+  (interactive)
+  (let ((current-alpha (car (frame-parameter nil 'alpha))))
+    (if (and current-alpha (< current-alpha 100))
+        (set-frame-parameter nil 'alpha '(100 . 100))
+      (set-frame-parameter nil 'alpha `(,andy/opacity-level . 50)))))
+
+;; 3. Keybinding for Transparency
+(global-set-key (kbd "C-c T") #'andy/toggle-transparency)
+
+;; Window Switching (Easier than C-x o)
+(use-package switch-window
+  :bind ("C-x o" . switch-window))
+
+;; macOS Specific Browse
+(use-package osx-browse
+  :if (eq system-type 'darwin)
+  :config (osx-browse-mode 1))
+
+;; Dashboard (The startup screen)
+(use-package dashboard
+  :demand t
+  :config
+  (dashboard-setup-startup-hook)
+  (setq dashboard-banner-logo-title "Welcome back Andy :)"
+        dashboard-startup-banner 'logo
+        dashboard-center-content t
+        dashboard-set-heading-icons t
+        dashboard-set-file-icons t))
+
+;; Clean up the title bar to show file path
+(setq-default frame-title-format "%b (%f)")
+
+;; ----------------------------------------
+;; 17. Languages & File Management
+;; ----------------------------------------
+
+;; CSV Files
+(use-package csv-mode
+  :mode ("\\.csv\\'" . csv-mode)
+  :config
+  (setq csv-separators '("," ";" "|" " " "    ")))
+
+;; YAML Files
+(use-package yaml-mode
+  :mode ("\\.yml\\'" . yaml-mode))
+
+;; Rainbow Identifiers (Colorizes variables uniquely)
+(use-package rainbow-identifiers
+  :hook (prog-mode . rainbow-identifiers-mode))
+
+;; Ported Backup/Auto-save Logic
+(setq backup-directory-alist `(("." . ,(expand-file-name "saves" user-emacs-directory)))
+      auto-save-file-name-transforms `((".*" ,(expand-file-name "auto-save/" user-emacs-directory) t))
+      delete-old-versions t
+      kept-new-versions 6
+      kept-old-versions 2
+      version-control t)
+
+;; Ensure directories exist
+(make-directory (expand-file-name "saves" user-emacs-directory) t)
+(make-directory (expand-file-name "auto-save" user-emacs-directory) t)
+
+;; ----------------------------------------
+;; 18. Personal Utilities & Scratch Files
+;; ----------------------------------------
+
+(defun andy/create-scratch-file (file-extension)
+  "Creates a temporary file with the FILE-EXTENSION provided.
+Ported from old config."
+  (interactive "sEnter file extension (e.g., py, el, md): ")
+  (let ((temp-file (make-temp-file "andy-scratch-" nil (concat "." file-extension))))
+    (find-file-other-window temp-file)))
+
+;; Optional: Bind it to a key
+(global-set-key (kbd "C-c c s") #'andy/create-scratch-file)
+
+;; Allow erasing buffers without confirmation (from old config)
+(put 'erase-buffer 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+
+;; Provide a feature name for the whole file
+(provide 'init)
 
 ;;; init.el ends here
