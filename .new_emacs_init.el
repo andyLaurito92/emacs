@@ -4,11 +4,18 @@
 (setq package-enable-at-startup nil)
 
 ;; ----------------------------------------
+;; Early Key-Map Definitions (Prevents Prefix Errors)
+;; ----------------------------------------
+(global-unset-key (kbd "C-c r"))
+(define-prefix-command 'andy-org-roam-map)
+(global-set-key (kbd "C-c r") 'andy-org-roam-map)
+
+;; ----------------------------------------
 ;; 0. Manual Path Injection (Fixes "failed to run git")
 ;; ----------------------------------------
 (let ((homebrew-path "/opt/homebrew/bin"))
   (when (and (eq system-type 'darwin)
-             (file-directory-p homebrew-path))
+          (file-directory-p homebrew-path))
     (add-to-list 'exec-path homebrew-path)
     (setenv "PATH" (concat homebrew-path ":" (getenv "PATH")))))
 
@@ -58,6 +65,14 @@
 (set-fringe-mode 10)
 (column-number-mode)
 (global-display-line-numbers-mode t)
+
+(when (eq system-type 'darwin)
+  (setq mac-command-modifier 'meta)   ;; Sets Command to Meta (M-)
+  (setq mac-option-modifier 'none)    ;; Leaves Option for special characters (like symbols)
+  ;; (setq mac-option-modifier 'alt)  ;; Alternative: set Option to Alt if you prefer
+  
+  ;; Make sure Emacs recognizes the right Command key on modern keyboards
+  (setq ns-function-modifier 'control))
 
 ;; Set default frame size (Height x Width)
 (add-to-list 'default-frame-alist '(height . 60))
@@ -236,6 +251,11 @@
 ;; 13. Lisp Development & Structural Editing
 ;; ----------------------------------------
 
+;; Set standard Lisp indentation (2 spaces)
+(setq lisp-indent-offset 2)
+(setq emacs-lisp-mode-hook '((lambda () (setq lisp-indent-offset 2))))
+
+
 ;; Paredit: Provides structural editing (keeps parentheses balanced)
 (use-package paredit
   :hook ((emacs-lisp-mode 
@@ -272,7 +292,7 @@
 ;; ----------------------------------------
 
 (use-package org
-  :straight (:type built-in)
+  :straight t 
   :hook (org-mode . (lambda ()
                       (org-indent-mode)
                       (variable-pitch-mode 1)
@@ -284,6 +304,10 @@
         org-hide-leading-stars t
         org-agenda-files '("~/org")))
 
+;; Force Org to load completely BEFORE Org-Roam starts
+(with-eval-after-load 'org
+  (require 'org-element))
+
 (use-package org-bullets
   :after org
   :hook (org-mode . org-bullets-mode)
@@ -292,14 +316,18 @@
 
 (use-package org-roam
   :after org
+  :init
+  (setq org-roam-v2-ack t)
   :custom
   (org-roam-directory (file-truename "~/RoamNotes"))
   (org-roam-completion-everywhere t)
-  ;; This tells Emacs that C-c n is a prefix for ALL org-roam commands
-  :bind-keymap ("C-c n" . org-roam-mode-map)
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert)
+  :bind (:map andy-org-roam-map
+         ("l" . org-roam-buffer-toggle)
+         ("f" . org-roam-node-find)
+         ("i" . org-roam-node-insert)
+         ("g" . org-roam-graph)
+         ("c" . org-roam-capture)
+         ("j" . org-roam-dailies-capture-today)
          :map org-mode-map
          ("C-M-i" . completion-at-point))
   :config
@@ -311,7 +339,6 @@
            "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
            :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
            :unnarrowed t)))
-
   (setq org-roam-dailies-capture-templates
         '(("d" "default" entry "* %<%I:%M %p>: %?" 
            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
@@ -349,6 +376,7 @@
         '((python-mode . python-indent-offset)
           (emacs-lisp-mode . lisp-indent-offset)
           (lisp-mode . lisp-indent-offset)
+	  (common-lisp-mode . lisp-indent-offset)
           (yaml-mode . yaml-indent-offset)
           (csv-mode . 0))) ; CSVs don't really indent
   ;; Ensure dependencies are available
