@@ -14,6 +14,13 @@ having some issues. Things to do:
 - to keep revisitign
 
 
+For installing nerd-fonts do:
+
+1. Run this inside Emacs: M-x nerd-icons-install-fonts (This downloads the symbol font. Follow the prompt to save and install it in your Font Book).
+2. Download a Patched Font: Go to NerdFonts.com and download JetBrainsMono Nerd Font. Install the .ttf files to your Mac.
+3. Open a terminal, go to the folder where you downloaded the fonts and run `cp *.ttf ~/Library/Fonts/`
+
+
 ====================================
 OLD
 ====================================

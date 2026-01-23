@@ -80,8 +80,7 @@
 
 ;; Optional: If you want the current frame to resize immediately on load
 (set-frame-size (selected-frame) 170 50)
-
-
+(set-face-attribute 'default nil :font "JetBrainsMono Nerd Font" :height 130)
 ;; ----------------------------------------
 ;; 5. Theme & Modeline
 ;; ----------------------------------------
@@ -98,8 +97,11 @@
   :demand t
   :hook (after-init . doom-modeline-mode)
   :config
-  (setq doom-modeline-height 15)
-  )
+  (setq doom-modeline-height 15
+        ;; Use nerd-icons for the modeline
+        doom-modeline-icon t
+        doom-modeline-major-mode-icon t))
+
 ;; ----------------------------------------
 ;; 6. Evil (Vim emulation)
 ;; ----------------------------------------
@@ -163,12 +165,39 @@
 
 (use-package treemacs
   :defer t
-  :bind (("C-c t" . treemacs)))
+  :bind (("C-c t" . treemacs)
+         ("M-0"   . treemacs-select-window))
+  :config
+  (setq treemacs-no-png-images t                 ;; Use clean text icons
+        treemacs-width 35                        ;; Set a comfortable width
+        treemacs-indentation 2                   ;; Compact indent
+        treemacs-project-follow-cleanup t        ;; Auto-cleanup empty project entries
+        treemacs-show-cursor t)                  ;; Make it obvious where you are
+  
+  ;; THE FIX: This makes Treemacs follow your cursor
+  (treemacs-follow-mode t)
+  
+  ;; This makes Treemacs start automatically with certain projects
+  (treemacs-project-follow-mode t)
+  
+  ;; Ensure it stays in sync with file system changes
+  (treemacs-filewatch-mode t))
 
 (use-package treemacs-projectile :after (treemacs projectile))
 (use-package treemacs-evil :after (treemacs evil))
-(use-package all-the-icons :if (display-graphic-p))
+(use-package nerd-icons
+  :if (display-graphic-p))
 
+(use-package nerd-icons-ivy-rich
+  :after (ivy counsel)
+  :init
+  (nerd-icons-ivy-rich-mode 1))
+
+(use-package treemacs-nerd-icons
+  :after (treemacs)
+  :demand t
+  :config
+  (treemacs-load-theme "nerd-icons"))
 
 ;; ----------------------------------------
 ;; 10. Python Development Module (Conda & LSP)
