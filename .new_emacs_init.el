@@ -287,6 +287,7 @@
   ;; Ensure paredit works inside the SLIME REPL
   (add-hook 'slime-repl-mode-hook #'enable-paredit-mode))
 
+
 ;; ----------------------------------------
 ;; 14. Org Mode & Roam (Writing & Notes)
 ;; ----------------------------------------
@@ -298,15 +299,17 @@
                       (variable-pitch-mode 1)
                       (visual-line-mode 1)))
   :config
+  (require 'org-element)
   (setq org-ellipsis " ⤵"
         org-hide-mphasis-markers t
         org-startup-indented t
-        org-hide-leading-stars t
-        org-agenda-files '("~/org")))
-
-;; Force Org to load completely BEFORE Org-Roam starts
-(with-eval-after-load 'org
-  (require 'org-element))
+        org-hide-leading-stars t)
+  
+  ;; This executes the code to find the path and puts it in a list
+  (let ((agenda-dir (expand-file-name "org" user-emacs-directory)))
+    (unless (file-directory-p agenda-dir)
+      (make-directory agenda-dir t))
+    (setq org-agenda-files (list agenda-dir))))
 
 (use-package org-bullets
   :after org
@@ -339,13 +342,13 @@
            "\n* Source\n\nAuthor: %^{Author}\nTitle: ${title}\nYear: %^{Year}\n\n* Summary\n\n%?"
            :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
            :unnarrowed t)))
+           
   (setq org-roam-dailies-capture-templates
         '(("d" "default" entry "* %<%I:%M %p>: %?" 
            :target (file+head "%<%Y-%m-%d>.org" "#+title: %<%Y-%m-%d>\n"))))
 
-  (org-roam-db-autosync-mode)
-  (require 'org-roam-dailies))
-
+  ;; Start the database sync ONLY when org-roam is actually loaded/called
+  (org-roam-db-autosync-mode))
 
 ;; ----------------------------------------
 ;; 15. AI Assistance (Copilot & Ollama)
