@@ -5,14 +5,8 @@ Personal emacs config
 NEW
 ====================================
 
-I'm rewriting my .init emacs focusing on modules. The idea is to later be able
-to split the huge .init.el file into smaller files :). So far good start, but still
-having some issues. Things to do:
-
-- treemacs projectile
-- python shell interpreter
-- to keep revisitign
-
+I think I've migrated all major concenrs. Now it's time to use it and 
+see what's missing :)
 
 For installing nerd-fonts do:
 
