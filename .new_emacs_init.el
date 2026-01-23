@@ -344,6 +344,13 @@
               ("M-n" . copilot-next-completion)
               ("M-p" . copilot-previous-completion))
   :config
+  ; Fix the "no mode-specific indentation offset" warning
+  (setq copilot-indent-offset-alist
+        '((python-mode . python-indent-offset)
+          (emacs-lisp-mode . lisp-indent-offset)
+          (lisp-mode . lisp-indent-offset)
+          (yaml-mode . yaml-indent-offset)
+          (csv-mode . 0))) ; CSVs don't really indent
   ;; Ensure dependencies are available
   (require 'editorconfig)
   (require 'dash)
