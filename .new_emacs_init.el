@@ -226,6 +226,10 @@
   :init
   (setq lsp-keymap-prefix "C-c l")
   :config
+  ;; Add this inside your (use-package lsp-mode ...) :config block
+  (setq lsp-file-watch-threshold 2000)
+  ;; Prevent LSP from indexing the entire Homebrew/Anaconda tree
+  (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]/opt/homebrew")
   (setq lsp-enable-snippet t
         lsp-prefer-flymake nil))
 
