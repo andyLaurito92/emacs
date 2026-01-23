@@ -169,15 +169,27 @@
 (use-package treemacs-evil :after (treemacs evil))
 (use-package all-the-icons :if (display-graphic-p))
 
+
 ;; ----------------------------------------
-;; 10. Python Development Module (The Big One)
+;; 10. Python Development Module (Conda & LSP)
 ;; ----------------------------------------
 
-;; Virtual Environment Management
-(use-package pyvenv
+;; Conda Environment Management
+;; Conda Environment Management
+(use-package conda
+  :straight t
+  :init
+  (setq conda-anaconda-home (expand-file-name "/opt/homebrew/anaconda3")
+        conda-env-home-directory (expand-file-name "/opt/homebrew/anaconda3"))
   :config
-  (pyvenv-mode 1))
-
+  (add-to-list 'exec-path "/opt/homebrew/anaconda3/bin")
+  (conda-env-autoactivate-mode t)
+  
+  ;; ONLY set the modeline format here, once conda is actually loaded
+  (setq-default mode-line-format
+                (cons '(:eval (if (fboundp 'conda-env-name) 
+                                  (concat "🐍 " (conda-env-name) " ") ""))
+                      mode-line-format)))
 ;; LSP Client
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
@@ -203,49 +215,83 @@
   :hook (after-init . global-company-mode)
   :config (setq company-idle-delay 0.1))
 
-;; Auto-formatting
+;; Auto-formatting (using black and isort)
 (use-package apheleia
   :config
   (apheleia-global-mode +1)
   (setf (alist-get 'python-mode apheleia-mode-alist) '(isort black)))
 
 ;; ----------------------------------------
-;; 11. Vterm & Shell Toggle (Modern REPL)
+;; 11. Interactive Shell Management
 ;; ----------------------------------------
 
-(use-package vterm
-  :straight t)
+;; Keep Vterm for general terminal work, but don't use it for Python
+(use-package vterm :straight t)
 
-(use-package vterm-toggle
-  :straight t
-  :bind (("C-c C-z" . vterm-toggle)
-         :map vterm-mode-map
-         ("C-c C-z" . vterm-toggle)) ;; Toggle it closed from inside vterm
-  :config
-  (setq vterm-toggle-fullscreen-p nil)
-  ;; This ensures the terminal always pops up at the bottom
-  (add-to-list 'display-buffer-alist
-               '((lambda (bufname _) (with-current-buffer bufname (equal major-mode 'vterm-mode)))
-                 (display-buffer-reuse-window display-buffer-at-bottom)
-                 (window-height . 0.3))))
+;; Ensure the Python shell always opens at the bottom (like Elpy)
+(add-to-list 'display-buffer-alist
+             '("^\\*Python\\*$"
+               (display-buffer-reuse-window display-buffer-at-bottom)
+               (window-height . 0.3)))
 
 ;; ----------------------------------------
-;; 12. Final Python Logic & Evil Keys
+;; 12. Python Logic & REPL Keybindings (The Aesthetic Fix)
 ;; ----------------------------------------
 
-(setq python-shell-interpreter "python3"
-      python-shell-interpreter-args "-i")
+(setq python-shell-interpreter "/opt/homebrew/anaconda3/bin/ipython"
+      python-shell-interpreter-args "-i --simple-prompt"
+      python-shell-eval-setup-code ""
+      python-shell-completion-native-enable nil)
+
+;; Keep this nil to prevent double-echoing now that we are using cpaste
+(setq-default comint-process-echoes nil)
+
+(defun andy/python-shell-switch-or-start ()
+  "Switch to IPython shell, starting it if necessary."
+  (interactive)
+  (if (python-shell-get-process)
+      (python-shell-switch-to-shell)
+    (run-python (python-shell-calculate-command) nil t)
+    (python-shell-switch-to-shell)))
+
+(defun andy/python-send-to-repl (beg end)
+  "Sends code to IPython. Markers are hidden, code is visible."
+  (let* ((proc (python-shell-get-process))
+         (code (buffer-substring-no-properties beg end))
+         (buff (process-buffer proc)))
+    (if (not proc)
+        (andy/python-shell-switch-or-start)
+      (with-current-buffer buff
+        (goto-char (process-mark proc))
+        ;; We send the 'start' marker hidden
+        (process-send-string proc "%cpaste -q\n")
+        ;; We insert the code into the buffer so you SEE it
+        (insert code)
+        (comint-send-input)
+        ;; We send the 'end' marker hidden
+        (process-send-string proc "\n--\n"))
+      (message "Sent to IPython"))))
+
+(defun andy/python-smart-send ()
+  (interactive)
+  (let* ((bounds (if (use-region-p)
+                     (cons (region-beginning) (region-end))
+                   (save-excursion
+                     (python-nav-beginning-of-defun)
+                     (cons (point) (progn (python-nav-end-of-defun) (point)))))))
+    (andy/python-send-to-repl (car bounds) (cdr bounds))))
+
+(defun andy/python-send-statement-and-step ()
+  (interactive)
+  (let ((beg (save-excursion (python-nav-beginning-of-statement) (point)))
+        (end (save-excursion (python-nav-end-of-statement) (point))))
+    (andy/python-send-to-repl beg end)
+    (python-nav-forward-statement)))
 
 (with-eval-after-load 'python
-  ;; vterm-toggle handles starting the shell and switching automatically
-  (define-key python-mode-map (kbd "C-c C-z") 'vterm-toggle))
-
-(with-eval-after-load 'evil
-  (evil-define-key 'normal python-mode-map
-    (kbd "g d") 'lsp-find-definition
-    (kbd "g r") 'lsp-find-references
-    (kbd "K")   'lsp-ui-doc-glance))
-
+  (define-key python-mode-map (kbd "C-c C-z") #'andy/python-shell-switch-or-start)
+  (define-key python-mode-map (kbd "C-c C-c") #'andy/python-smart-send)
+  (define-key python-mode-map (kbd "C-<return>") #'andy/python-send-statement-and-step))
 
 ;; ----------------------------------------
 ;; 13. Lisp Development & Structural Editing
