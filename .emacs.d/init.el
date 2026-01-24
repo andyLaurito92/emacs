@@ -327,45 +327,64 @@
   (define-key python-mode-map (kbd "C-<return>") #'andy/python-send-statement-and-step))
 
 ;; ----------------------------------------
-;; 13. Lisp Development & Structural Editing
+;; 13. Lisp Development (Sly, Paredit & Documentation)
 ;; ----------------------------------------
 
-;; Set standard Lisp indentation (2 spaces)
 (setq lisp-indent-offset 2)
-(setq emacs-lisp-mode-hook '((lambda () (setq lisp-indent-offset 2))))
+(add-to-list 'auto-mode-alist '("\\.cl\\'" . lisp-mode))
+(add-to-list 'auto-mode-alist '("\\.lisp\\'" . lisp-mode))
 
-
-;; Paredit: Provides structural editing (keeps parentheses balanced)
 (use-package paredit
   :hook ((emacs-lisp-mode 
           lisp-mode 
-          clojure-mode 
-          scheme-mode 
-          lisp-interaction-mode) . enable-paredit-mode)
-  :config
-  ;; Enable paredit in the minibuffer for eval-expression
-  (add-hook 'minibuffer-setup-hook 
-            (lambda ()
-              (when (memq this-command '(eval-expression pp-eval-expression))
-                (enable-paredit-mode)))))
+          sly-mrepl-mode 
+          lisp-interaction-mode) . enable-paredit-mode))
 
-;; Paredit Everywhere: Enables paredit features in non-lisp modes (strings, etc.)
-(use-package paredit-everywhere
-  :hook (prog-mode . paredit-everywhere-mode))
-
-;; SLIME: The Superior Lisp Interaction Mode for Common Lisp
-(use-package slime
+(use-package sly
+  :hook (lisp-mode . sly-mode)
   :init
-  (setq inferior-lisp-program "sbcl") ; Matches your old config
+  (setq inferior-lisp-program "/opt/homebrew/bin/sbcl")
+  ;; --- MAC SSL FIX START ---
+  (setenv "LDFLAGS" "-L/opt/homebrew/opt/openssl@3/lib")
+  (setenv "CPPFLAGS" "-I/opt/homebrew/opt/openssl@3/include")
+  (setenv "LD_LIBRARY_PATH" 
+          (concat "/opt/homebrew/opt/openssl@3/lib:" (getenv "LD_LIBRARY_PATH")))
+  ;; --- MAC SSL FIX END ---
+  ;; Permanent fix for the SLIME warnings
+  (setq lisp-mode-hook (remove 'slime-lisp-mode-hook lisp-mode-hook))
   :config
-  ;; Load the quicklisp helper if it exists
-  (let ((slime-helper "~/quicklisp/slime-helper.el"))
-    (when (file-exists-p (expand-file-name slime-helper))
-      (load (expand-file-name slime-helper))))
-  
-  ;; Ensure paredit works inside the SLIME REPL
-  (add-hook 'slime-repl-mode-hook #'enable-paredit-mode))
+  (setq sly-contribs '(sly-fancy))
+  (setq sly-description-autofocus t)
 
+  ;; DIRECT HYPERSPEC LINK (No package needed)
+  (setq common-lisp-hyperspec-root "https://www.lispworks.com/documentation/HyperSpec/")
+
+  ;; Documentation Power-ups
+  (define-key lisp-mode-map (kbd "C-c d") #'sly-describe-symbol)
+  (define-key lisp-mode-map (kbd "C-c h") #'sly-hyperspec-lookup)
+
+  ;; Keybindings and REPL Fixes
+  (define-key lisp-mode-map (kbd "C-<return>") #'sly-eval-last-expression)
+  
+  (with-eval-after-load 'sly-mrepl
+    (define-key sly-mrepl-mode-map (kbd "RET") #'sly-mrepl-return)
+    (define-key sly-mrepl-mode-map [return] #'sly-mrepl-return)
+    (define-key lisp-mode-map (kbd "C-c C-z") #'sly-mrepl-sync)))
+
+(use-package sly-completion-helper
+  :after sly
+  :straight nil)
+
+(defun andy/sly-split-window ()
+  "Start Sly and ensure the REPL is at the bottom."
+  (interactive)
+  (sly)
+  (delete-other-windows)
+  (split-window-below (floor (* 0.7 (window-height))))
+  (sly-mrepl-sync))
+
+;; Optional: Change your global "Start Sly" key to use this instead
+(global-set-key (kbd "C-c S") #'andy/sly-split-window)
 
 ;; ----------------------------------------
 ;; 14. Org Mode & Roam (Writing & Notes)
@@ -380,9 +399,9 @@
   :config
   (require 'org-element)
   (setq org-ellipsis " ⤵"
-        org-hide-mphasis-markers t
-        org-startup-indented t
-        org-hide-leading-stars t)
+    org-hide-mphasis-markers t
+    org-startup-indented t
+    org-hide-leading-stars t)
   
   ;; This executes the code to find the path and puts it in a list
   (let ((agenda-dir (expand-file-name "org" user-emacs-directory)))
@@ -552,7 +571,7 @@
   "Creates a temporary file with the FILE-EXTENSION provided.
 Ported from old config."
   (interactive "sEnter file extension (e.g., py, el, md): ")
-  (let ((temp-file (make-temp-file "andy-scratch-" nil (concat "." file-extension))))
+ (buffer-file-name) (let ((temp-file (make-temp-file "andy-scratch-" nil (concat "." file-extension))))
     (find-file-other-window temp-file)))
 
 ;; Optional: Bind it to a key
