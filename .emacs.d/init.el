@@ -452,14 +452,33 @@
 ;; 15. AI Assistance (Copilot & Ollama)
 ;; ----------------------------------------
 
+(defun my/get-chatgpt-key ()
+  "Read open ai key from file"
+  (let ((key-file (expand-file-name "~/.ssh/chatgpt_api_key.txt")))
+		(if (file-exists-p key-file)
+				(with-temp-buffer
+					(insert-file-contents key-file)
+					(string-trim (buffer-string)))
+			(error "OpenAI key file not found"))))
+
 ;; GPTel: Interface for Ollama/Local LLMs
 (use-package gptel
   :config
-  (setq gptel-model 'llama3.2:latest
-        gptel-backend (gptel-make-ollama "Ollama" 
-                                         :host "localhost:11434" 
-                                         :stream t 
-                                         :models '(llama3.2:latest))))
+  (setq gptel-api-key #'my/get-chatgpt-key)
+  (setq gptel-expert-commands t)
+  ;; 2. Default Model (Optional: Change this to 'gpt-4o or keep llama)
+  (setq gptel-model 'gpt-4o-mini
+    gptel-default-mode 'markdown-mode
+    gptel-system-prompt "You are a helpful coding assistant that provides concise and accurate answers to programming questions.")
+
+  (gptel-make-ollama "Ollama" 
+                    :host "localhost:11434" 
+                    :stream t 
+                    :models '(llama3.2:latest))
+
+  (setq gptel-system-prompt "You are a helpful coding assistant that provides concise and accurate answers to programming questions.")
+  :bind (("C-c g" . gptel-menu))
+  )
 
 ;; Github Copilot
 (use-package copilot
