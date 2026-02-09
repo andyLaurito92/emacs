@@ -144,7 +144,8 @@
   :after ivy
   :bind (("M-x" . counsel-M-x)
          ("C-x C-f" . counsel-find-file)
-         ("C-x b" . counsel-ibuffer)))
+         ("C-x b" . counsel-ibuffer)
+         ("C-M-y" . counsel-yank-pop)))
 
 (use-package swiper :after ivy)
 
@@ -464,21 +465,17 @@
 ;; GPTel: Interface for Ollama/Local LLMs
 (use-package gptel
   :config
-  (setq gptel-api-key #'my/get-chatgpt-key)
-  (setq gptel-expert-commands t)
-  ;; 2. Default Model (Optional: Change this to 'gpt-4o or keep llama)
-  (setq gptel-model 'gpt-4o-mini
-    gptel-default-mode 'markdown-mode
-    gptel-system-prompt "You are a helpful coding assistant that provides concise and accurate answers to programming questions.")
+  (setq gptel-api-key #'my/get-chatgpt-key
+        gptel-expert-commands t
+        gptel-model 'gpt-4o-mini
+        gptel-default-mode 'markdown-mode
+        gptel-system-prompt "You are a helpful coding assistant that provides concise and accurate answers to programming questions.")
 
   (gptel-make-ollama "Ollama" 
                     :host "localhost:11434" 
                     :stream t 
                     :models '(llama3.2:latest))
-
-  (setq gptel-system-prompt "You are a helpful coding assistant that provides concise and accurate answers to programming questions.")
-  :bind (("C-c g" . gptel-menu))
-  )
+  :bind (("C-c g" . gptel-menu)))
 
 ;; Github Copilot
 (use-package copilot
@@ -586,11 +583,12 @@
 ;; 18. Personal Utilities & Scratch Files
 ;; ----------------------------------------
 
+
 (defun andy/create-scratch-file (file-extension)
   "Creates a temporary file with the FILE-EXTENSION provided.
 Ported from old config."
   (interactive "sEnter file extension (e.g., py, el, md): ")
- (buffer-file-name) (let ((temp-file (make-temp-file "andy-scratch-" nil (concat "." file-extension))))
+  (let ((temp-file (make-temp-file "andy-scratch-" nil (concat "." file-extension))))
     (find-file-other-window temp-file)))
 
 ;; Optional: Bind it to a key
@@ -603,4 +601,15 @@ Ported from old config."
 ;; Provide a feature name for the whole file
 (provide 'init)
 
-;;; init.el ends here
+;; ----------------------------------------
+;; 19. OpenClaw Integration
+;; ----------------------------------------
+
+(use-package emacs-openclaw
+  :straight (:host github :repo "andyLaurito92/emacs-openclaw")
+  :bind ("C-c o c" . emacs-openclaw-chat)
+  ;; :config
+  ;; (with-eval-after-load 'evil
+  ;;   (evil-define-key 'insert emacs-openclaw-mode-map (kbd "RET") #'emacs-openclaw-send-line)
+  ;;   (evil-define-key 'normal emacs-openclaw-mode-map (kbd "RET") #'emacs-openclaw-send-line))
+  )
