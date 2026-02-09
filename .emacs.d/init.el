@@ -607,9 +607,4 @@ Ported from old config."
 
 (use-package emacs-openclaw
   :straight (:host github :repo "andyLaurito92/emacs-openclaw")
-  :bind ("C-c o c" . emacs-openclaw-chat)
-  ;; :config
-  ;; (with-eval-after-load 'evil
-  ;;   (evil-define-key 'insert emacs-openclaw-mode-map (kbd "RET") #'emacs-openclaw-send-line)
-  ;;   (evil-define-key 'normal emacs-openclaw-mode-map (kbd "RET") #'emacs-openclaw-send-line))
-  )
+  :bind ("C-c o c" . emacs-openclaw-chat))
