@@ -158,6 +158,7 @@
   :config
   (projectile-mode +1)
   (setq projectile-completion-system 'ivy)
+  (setq projectile-project-search-path '("~/repos"))
   :bind-keymap ("C-c p" . projectile-command-map))
 
 (straight-use-package '(llama :type git :host github :repo "tarsius/llama"))
