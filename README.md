@@ -1,6 +1,10 @@
 Personal emacs config
 
-1. For first time installation, I download the last emacs from https://emacsformacosx.com/
+Pre-requirements:
+
+1. Download the last emacs from https://emacsformacosx.com/
+2. brew install --cask font-jetbrains-mono-nerd-font
+3. brew install ripgrep, fd
 
 Switching in OSX to use doom-emacs. I followed this installation steps: https://github.com/doomemacs/doomemacs/blob/develop/docs/getting_started.org#with-homebrew (installed emacs-mac)
 
