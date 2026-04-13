@@ -32,8 +32,9 @@
         (url-retrieve-synchronously
          "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
          'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-last-sexp)))
+      (goto-char (point-min))
+      (re-search-forward "^$" nil 'move)
+      (eval-region (point) (point-max))))
   (load bootstrap-file nil 'nomessage))
 
 ;; ----------------------------------------
