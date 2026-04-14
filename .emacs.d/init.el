@@ -610,3 +610,44 @@ Ported from old config."
 (use-package emacs-openclaw
   :straight (:host github :repo "andyLaurito92/emacs-openclaw")
   :bind ("C-c o c" . emacs-openclaw-chat))
+
+;; ----------------------------------------
+;; 20. Infrastructure (Go, Terraform, Cloud)
+;; ----------------------------------------
+
+;; --- Go ---
+(use-package go-mode
+  :hook (go-mode . lsp-deferred)
+  :config
+  (setq gofmt-command "goimports")
+  (add-hook 'before-save-hook #'gofmt-before-save))
+
+;; --- Terraform / HCL ---
+(use-package terraform-mode
+  :mode "\\.tf\\'"
+  :hook (terraform-mode . lsp-deferred)
+  :config
+  (setq terraform-indent-level 2))
+
+;; --- Dockerfile ---
+(use-package dockerfile-mode
+  :mode "Dockerfile\\'")
+
+;; --- YAML (already have yaml-mode, just add LSP) ---
+(add-hook 'yaml-mode-hook #'lsp-deferred)
+
+;; --- JSON ---
+(use-package json-mode
+  :mode "\\.json\\'")
+
+;; --- jq (query JSON from inside Emacs) ---
+(use-package jq-mode
+  :after json-mode)
+
+;; --- Kubernetes manifests ---
+(use-package kubernetes
+  :commands (kubernetes-overview)
+  :bind ("C-c k" . kubernetes-overview))
+
+(use-package kubernetes-evil
+  :after (kubernetes evil))
