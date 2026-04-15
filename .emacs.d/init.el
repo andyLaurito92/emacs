@@ -161,6 +161,14 @@
   (setq projectile-project-search-path '("~/repos"))
   :bind-keymap ("C-c p" . projectile-command-map))
 
+;; This provides the actual 'ripgrep' and 'projectile-ripgrep' commands
+(use-package ripgrep
+  :straight t)
+
+(use-package projectile-ripgrep
+  :straight t
+  :after (projectile ripgrep))
+
 (straight-use-package '(llama :type git :host github :repo "tarsius/llama"))
 (use-package magit
   :straight (:host github :repo "magit/magit")
