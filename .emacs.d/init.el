@@ -210,6 +210,14 @@
   :config
   (treemacs-load-theme "nerd-icons"))
 
+(use-package lsp-treemacs
+  :straight t
+  :after (lsp-mode treemacs)
+  :bind ("C-c i" . lsp-treemacs-symbols)
+  :config
+  ;; This ensures the symbols view stays synchronized with your cursor
+  (lsp-treemacs-sync-mode 1))
+
 ;; ----------------------------------------
 ;; 10. Python Development Module (Conda & LSP)
 ;; ----------------------------------------
